@@ -1,0 +1,32 @@
+
+/* src/components/FilterSidebar.css */
+
+.filterPanel {
+  background: #fff;
+  color: #111;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #ddd;
+}
+
+.filterTitle {
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.filterRow {
+  display: grid;
+  row-gap: 6px;       /* Abstand zwischen Label und Feld */
+  margin-bottom: 12px;/* "ein Abstand mehr" zur nächsten Zeile */
+}
+
+.filterRow label {
+  font-weight: 600;
+}
+
+.filterActions {
+  display: flex;
+  gap: 10px;          /* Abstand zwischen Buttons */
+  margin-top: 6px;
+}

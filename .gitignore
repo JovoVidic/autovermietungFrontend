@@ -22,3 +22,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# --- Log Dateien ---
+logs/
+*.log
+*.log.*
+*.out
+*.tmp
+
+# Falls einzelne Services eigene Logordner haben
+*/logs/
+*/logs/*
+
+# IntelliJ / Eclipse generierte Logs
+idea.log
+eclipse.log
+
