@@ -114,15 +114,15 @@ export async function rentAuto(payload: RentAutoPayload): Promise<number> {
   // → Passe den Pfad unten an dein Backend an, falls abweichend.
 
   // Primärversuch: POST /api/rentals (empfohlen)
-  let res = await fetch(`/api/rentals`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  let res = await fetch(`/api/autos/${payload.autoId}/vermieten`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  body: JSON.stringify(payload),
+});
 
   // Fallback: Falls 404/405, versuche POST /api/autos/{id}/rent
   if (res.status === 404 || res.status === 405) {
-    res = await fetch(`/api/autos/${payload.autoId}/rent`, {
+    res = await fetch(`/api/autos/${payload.autoId}/vermieten`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify(payload),

@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-//import { rentAuto } from '../api/client';
+import { rentAuto } from '../api/client';
 
 type Props = {
   autoId: number;
@@ -32,6 +31,7 @@ export default function BookingForm({ autoId, onBooked }: Props) {
 
     try {
       setLoading(true);
+
       const preis = await rentAuto({
         autoId,
         customerId: DEFAULT_CUSTOMER_ID,
@@ -39,9 +39,43 @@ export default function BookingForm({ autoId, onBooked }: Props) {
         endDatum,
         insuranceOption: insuranceOption || undefined,
       });
+
       onBooked(Number(preis));
+
     } catch (e: any) {
-      setErr(e?.message ?? 'Fehler bei der Buchung');
+      // Standard-Fehlermeldung
+      let message = 'Fehler bei der Buchung';
+
+      // Versuche JSON vom Backend zu parsen
+      try {
+        const raw = e.message?.replace(/^HTTP \d+ [\w ]+ — /, '') ?? '{}';
+        const json = JSON.parse(raw);
+
+        switch (json.status) {
+          case 400:
+            message = json.message ?? 'Ungültige Buchungsdaten.';
+            break;
+          case 404:
+            message = json.message ?? 'Auto oder Kunde nicht gefunden.';
+            break;
+          case 409:
+            // Neuer Code: zeige belegte Zeit + frei ab
+            if (json.vermietetVon && json.vermietetBis && json.freiAb) {
+              message = `Dieses Auto ist bereits gebucht von ${json.vermietetVon} bis ${json.vermietetBis}. Frei ab ${json.freiAb}.`;
+            } else {
+              message = 'Dieses Auto ist im gewählten Zeitraum bereits vermietet.';
+            }
+            break;
+          default:
+            message = json.message ?? json.error ?? message;
+        }
+      } catch {
+        // Falls kein JSON, einfach den Text verwenden
+        message = e.message ?? message;
+      }
+
+      setErr(message);
+
     } finally {
       setLoading(false);
     }
