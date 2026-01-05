@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       // Alle Requests, die mit /api beginnen, gehen an dein Backend
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:3000',
         changeOrigin: true,
         // kein rewrite nötig, da dein Backend bereits unter /api/... mapped ist
         // wenn dein Backend NICHT /api prefix hätte, könntest du so umschreiben:

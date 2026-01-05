@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 
 import locationsRouter from './routes/locations';
 import autosRouter from './routes/autos';
+import authRouter from './routes/auth';
 import { dbHealthCheck } from './db';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.get('/api/health', async (_req, res) => {
 // Routen montieren
 app.use(locationsRouter);
 app.use(autosRouter);
+app.use(authRouter);
 
 // Serverstart
 const port = Number(process.env.PORT ?? 3000);
