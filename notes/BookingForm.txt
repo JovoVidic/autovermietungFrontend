@@ -1,11 +1,8 @@
 
-// src/components/BookingForm.tsx
 import { useState, useEffect } from 'react';
 import { calculatePrice, rentAuto } from '../api/calculatePrice';
 import type { PriceRequestDto } from '../api/types';
 import { validateBookingForm, isBookingFormValid } from './validation';
-import ErrorAlert from '../ui/ErrorAlert';
-import { formatServerError, type ErrorBoxData } from '../../utils/errors';
 
 type Props = {
   autoId: number;
@@ -14,6 +11,85 @@ type Props = {
 
 const DEFAULT_CUSTOMER_ID = 1 as const;
 
+// --- Hilfstyp für die UI-Fehlerbox ---
+type ErrorBoxData = {
+  title: string;
+  message: string;
+  details: Record<string, any> | null;
+};
+
+// --- Utility: rohen Fehler (oder Error-Objekt) schön aufbereiten ---
+// Falls rentAuto strukturierte Errors wirft (message + details), greift der erste Zweig.
+// Andernfalls wird dein bisheriges "HTTP 409 — {...}"-Muster geparst.
+function formatServerError(raw: unknown): ErrorBoxData {
+  const fallback: ErrorBoxData = {
+    title: 'Buchung nicht möglich',
+    message: 'Die Buchung konnte nicht durchgeführt werden.',
+    details: null,
+  };
+
+  // 1) Error-Objekt mit message (+ optional details vom Backend via rentAuto)
+  if (raw && typeof raw === 'object') {
+    const obj = raw as any;
+    if (obj.message) {
+      const details =
+        obj.details && typeof obj.details === 'object' ? obj.details : null;
+      return {
+        title: 'Buchung nicht möglich',
+        message: String(obj.message),
+        details,
+      };
+    }
+  }
+
+  // 2) Versuch: Text analysieren und JSON-Teil extrahieren
+  const text = String((raw as any)?.toString?.() ?? '');
+  if (!text) return fallback;
+
+  // Dein Muster: "HTTP 409 Conflict — {...json...}"
+  const parts = text.split('—');
+  let json: any = null;
+
+  if (parts.length > 1) {
+    try {
+      json = JSON.parse(parts[1].trim());
+    } catch {
+      // kein JSON, ignorieren
+    }
+  } else {
+    try {
+      json = JSON.parse(text.trim());
+    } catch {
+      // kein JSON, ignorieren
+    }
+  }
+
+  if (json && typeof json === 'object') {
+    const message = json.message ?? json.error ?? fallback.message;
+    const details: Record<string, any> = {};
+    if (json.vermietetVon) details['Vermietet von'] = json.vermietetVon;
+    if (json.vermietetBis) details['Vermietet bis'] = json.vermietetBis;
+    if (json.freiAb) details['Wieder frei ab'] = json.freiAb;
+
+    return {
+      title: 'Buchung nicht möglich',
+      message: String(message),
+      details: Object.keys(details).length ? details : null,
+    };
+  }
+
+  // 3) Fallback: HTTP-Text freundlich umformulieren
+  if (/HTTP\s+\d+/.test(text)) {
+    return {
+      title: 'Buchung nicht möglich',
+      message: 'Dieses Auto ist im gewählten Zeitraum bereits vermietet.',
+      details: null,
+    };
+  }
+
+  return fallback;
+}
+
 export default function BookingForm({ autoId, onBooked }: Props) {
   const [startDatum, setStartDatum] = useState('');
   const [endDatum, setEndDatum] = useState('');
@@ -21,7 +97,7 @@ export default function BookingForm({ autoId, onBooked }: Props) {
   const [preis, setPreis] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Freundliche Fehlerbox statt rohem String
+  // **Neu**: freundliche Fehlerbox (ersetzt den alten string `err`)
   const [errorBox, setErrorBox] = useState<ErrorBoxData | null>(null);
 
   // Preis live berechnen, wenn alle Daten vorhanden sind
@@ -42,6 +118,7 @@ export default function BookingForm({ autoId, onBooked }: Props) {
     };
 
     let active = true;
+    // Optional: leichter Debounce, damit nicht bei jedem Tastendruck gefeuert wird
     const t = setTimeout(() => {
       calculatePrice(req)
         .then((p) => active && setPreis(p))
@@ -88,6 +165,19 @@ export default function BookingForm({ autoId, onBooked }: Props) {
     }
   };
 
+  // einfache Inline-Styles (ohne CSS-Framework)
+  const alertStyle: React.CSSProperties = {
+    marginTop: 12,
+    padding: '10px 12px',
+    borderRadius: 6,
+    border: '1px solid #f5c2c7',
+    background: '#f8d7da',
+    color: '#58151c',
+  };
+
+  const alertTitleStyle: React.CSSProperties = { fontWeight: 600, marginBottom: 4 };
+  const alertListStyle: React.CSSProperties = { margin: '6px 0 0 0', paddingLeft: 18 };
+
   return (
     <form onSubmit={submit} style={{ display: 'grid', gap: 13, maxWidth: 520 }}>
       <div>
@@ -113,7 +203,21 @@ export default function BookingForm({ autoId, onBooked }: Props) {
       {preis !== null && <div><strong>Gesamtpreis:</strong> {preis.toFixed(2)} €</div>}
 
       {/* Freundliche Fehlerbox */}
-      {errorBox && <ErrorAlert error={errorBox} />}
+      {errorBox && (
+        <div role="alert" aria-live="assertive" style={alertStyle}>
+          <div style={alertTitleStyle}>❗ {errorBox.title}</div>
+          <div>{errorBox.message}</div>
+          {errorBox.details && (
+            <ul style={alertListStyle}>
+              {Object.entries(errorBox.details).map(([k, v]) => (
+                <li key={k}>
+                  <strong>{k}:</strong> {String(v)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <button
         type="submit"
@@ -124,3 +228,4 @@ export default function BookingForm({ autoId, onBooked }: Props) {
     </form>
   );
 }
+
