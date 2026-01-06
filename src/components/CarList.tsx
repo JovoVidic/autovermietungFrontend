@@ -1,18 +1,17 @@
+// src/components/CarList.tsx
 
 import { useEffect, useMemo, useState } from 'react';
 import { fetchCars } from '../api/client';
 import type { Car } from '../types/car';
 
-type SortKey = 'preisProTag' | 'marke' | 'modell';
-
 export default function CarList() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<SortKey>('preisProTag');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc'); // auf- oder absteigend
   const [query, setQuery] = useState('');
 
+  // Daten laden
   useEffect(() => {
     (async () => {
       try {
@@ -28,6 +27,7 @@ export default function CarList() {
     })();
   }, []);
 
+  // Filtern nach Suchbegriff
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return cars.filter(c =>
@@ -40,20 +40,16 @@ export default function CarList() {
     );
   }, [cars, query]);
 
+  // Sortieren nach Preis
   const sorted = useMemo(() => {
     const list = [...filtered];
     list.sort((a, b) => {
-      const va = a[sortKey] as any;
-      const vb = b[sortKey] as any;
-      if (typeof va === 'number' && typeof vb === 'number') {
-        return sortDir === 'asc' ? va - vb : vb - va;
-      }
-      const sa = String(va).toLowerCase();
-      const sb = String(vb).toLowerCase();
-      return sortDir === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
+      const va = a.preisProTag ?? 0;
+      const vb = b.preisProTag ?? 0;
+      return sortDir === 'asc' ? va - vb : vb - va;
     });
     return list;
-  }, [filtered, sortKey, sortDir]);
+  }, [filtered, sortDir]);
 
   if (loading) return <div>⏳ Lade Autos…</div>;
   if (error) return <div style={{ color: 'crimson' }}>Fehler: {error}</div>;
@@ -62,7 +58,7 @@ export default function CarList() {
     <div style={{ maxWidth: 900, margin: '2rem auto' }}>
       <h1>🚗 Fahrzeugliste</h1>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -70,14 +66,19 @@ export default function CarList() {
           style={{ flex: 1, padding: '0.5rem' }}
         />
 
-        <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}>
-          <option value="preisProTag">Preis/Tag</option>
-          <option value="marke">Marke</option>
-          <option value="modell">Modell</option>
-        </select>
+        {/* Sortier-Buttons */}
+        <button
+          onClick={() => setSortDir('asc')}
+          style={{ fontWeight: sortDir === 'asc' ? 'bold' : 'normal' }}
+        >
+          Preis ↑ Aufsteigend
+        </button>
 
-        <button onClick={() => setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))}>
-          Sortierung: {sortDir === 'asc' ? '↑' : '↓'}
+        <button
+          onClick={() => setSortDir('desc')}
+          style={{ fontWeight: sortDir === 'desc' ? 'bold' : 'normal' }}
+        >
+          Preis ↓ Absteigend
         </button>
       </div>
 

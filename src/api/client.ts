@@ -183,3 +183,21 @@ export async function fetchCarRentals(carId: number | string): Promise<Rental[]>
   const data = await res.json();
   return Array.isArray(data) ? data : [];
 }
+
+// =========================
+// Sortieren Preise
+// =========================
+
+export async function fetchCarsSortedAsc(): Promise<Car[]> {
+  const res = await fetch(`/api/autos/sort/asc`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data.map(normalizeCar) : [];
+}
+
+export async function fetchCarsSortedDesc(): Promise<Car[]> {
+  const res = await fetch(`/api/autos/sort/desc`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data.map(normalizeCar) : [];
+}

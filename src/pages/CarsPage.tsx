@@ -12,9 +12,22 @@ export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
 
   
-const filters = useMemo(() => {
+  const sortedCars = useMemo(() => {
+    const list = [...cars];
+    list.sort((a, b) => {
+      const pa = Number(a.preisProTag ?? 0);
+      const pb = Number(b.preisProTag ?? 0);
+      return sortDir === 'asc' ? pa - pb : pb - pa;
+    });
+    return list;
+  }, [cars, sortDir]);
+
+
+  const filters = useMemo(() => {
   const o: any = {};
   const keys = ['category','locationId','city','maxPreis','minSitze','transmission','fuel'] as const;
   keys.forEach(k => {
@@ -46,32 +59,75 @@ const filters = useMemo(() => {
     })();
   }, [filters]);
 
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, maxWidth: 1200, margin: '2rem auto' }}>
-      <aside>
-        <FilterSidebar          
-          values={{
+      return (
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '280px 1fr',
+          gap: 16,
+          maxWidth: 1200,
+          margin: '2rem auto',
+        }}
+      >
+        <aside>
+          <FilterSidebar
+            values={{
               category: params.get('category') ?? '',
-              city: params.get('city') ?? '',                // ⬅️ NEU
-              locationId: params.get('locationId') ?? '',    // optional beibehalten
+              city: params.get('city') ?? '',
+              locationId: params.get('locationId') ?? '',
               maxPreis: params.get('maxPreis') ?? '',
               minSitze: params.get('minSitze') ?? '',
               transmission: params.get('transmission') ?? '',
               fuel: params.get('fuel') ?? '',
             }}
-          onChange={(partial) => setParams(partial)}
-            onReset={() => setParams({
-              category:'', city:'', locationId:'', maxPreis:'', minSitze:'', transmission:'', fuel:''
-          })}
-        />
-      </aside>
+            onChange={partial => setParams(partial)}
+            onReset={() =>
+              setParams({
+                category: '',
+                city: '',
+                locationId: '',
+                maxPreis: '',
+                minSitze: '',
+                transmission: '',
+                fuel: '',
+              })
+            }
+          />
+        </aside>
 
-      <main>
-        <h2>Ergebnisse</h2>
-        {loading && <div>⏳ Lade…</div>}
-        {error && <div style={{ color: 'crimson' }}>{error}</div>}
-        {!loading && !error && <CarGrid cars={cars} />}
-      </main>
-    </div>
-  );
+        <main>
+          <h2>Ergebnisse</h2>
+
+          {/* ✅ SORTIER-BUTTONS */}
+          <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
+            <button
+              onClick={() => setSortDir('asc')}
+              style={{
+                padding: '0.5rem 1rem',
+                fontWeight: sortDir === 'asc' ? 'bold' : 'normal',
+              }}
+            >
+              Preis ↑
+            </button>
+
+            <button
+              onClick={() => setSortDir('desc')}
+              style={{
+                padding: '0.5rem 1rem',
+                fontWeight: sortDir === 'desc' ? 'bold' : 'normal',
+              }}
+            >
+              Preis ↓
+            </button>
+          </div>
+
+          {loading && <div>⏳ Lade…</div>}
+          {error && <div style={{ color: 'crimson' }}>{error}</div>}
+
+          {/* Noch OHNE Sortierung */}
+          {!loading && !error && <CarGrid cars={sortedCars} />}
+        </main>
+      </div>
+    );
+
 }
