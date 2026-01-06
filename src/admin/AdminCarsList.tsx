@@ -1,10 +1,10 @@
 
 // src/admin/AdminCarsList.tsx
 import { useEffect, useState } from 'react';
-import { fetchCars, deleteCar } from '../src/api/client';
-import type { Car } from '../src/types/car';
-import ErrorAlert from '../src/ui/ErrorAlert';
-import { formatServerError, type ErrorBoxData } from '../utils/errors';
+import { fetchCars, deleteCar } from '../api/client';
+import type { Car } from '../types/car';
+import ErrorAlert from '../ui/ErrorAlert';
+import { formatServerError, type ErrorBoxData } from '../../utils/errors';
 
 type Props = {
   onCreateNew: () => void;

@@ -1,3 +1,4 @@
+// src/components/CarDetail.tsx
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';

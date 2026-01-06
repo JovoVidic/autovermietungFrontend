@@ -1,16 +1,16 @@
 
 // src/admin/AdminView.tsx
 import { useEffect, useMemo, useState } from 'react';
-import { fetchCars, fetchCarById } from '../src/api/client';
-import type { Car } from '../src/types/car';
-import ErrorAlert from '../src/ui/ErrorAlert';
-import { formatServerError, type ErrorBoxData } from '../utils/errors';
+import { fetchCars, fetchCarById } from '../api/client';
+import type { Car } from '../types/car';
+import ErrorAlert from '../ui/ErrorAlert';
+import { formatServerError, type ErrorBoxData } from '../../utils/errors';
 import { validateCarInput } from './validation';
 import AdminCarForm from './AdminCarForm';
 import AdminCarDetails from './AdminCarDetails';
 import AdminCarsList from './AdminCarsList';
-import { useAuth } from '../src/contexts/AuthContext';
-import Login from '../src/components/Login';
+import { useAuth } from '../contexts/AuthContext';
+import Login from '../components/Login';
 
 // ------------------------------
 // Typen

@@ -1,11 +1,11 @@
 
 // src/admin/AdminCarForm.tsx
 import { useEffect, useState } from 'react';
-import type { Car } from '../src/types/car';
-import { createCar, updateCar } from '../src/api/client';
+import type { Car } from '../types/car';
+import { createCar, updateCar } from '../api/client';
 import { validateCarInput } from './validation';
-import ErrorAlert from '../src/ui/ErrorAlert';
-import { formatServerError, type ErrorBoxData } from '../utils/errors';
+import ErrorAlert from '../ui/ErrorAlert';
+import { formatServerError, type ErrorBoxData } from '../../utils/errors';
 
 type Props = {
   initial?: Car | null;

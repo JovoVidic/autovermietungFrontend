@@ -1,10 +1,10 @@
 
 // src/admin/AdminCarDetails.tsx
 import { useEffect, useState } from 'react';
-import type { Car } from '../src/types/car';
-import { fetchCarById, fetchCarRentals, type Rental } from '../src/api/client';
-import ErrorAlert from '../src/ui/ErrorAlert';
-import { formatServerError, type ErrorBoxData } from '../utils/errors';
+import type { Car } from '../types/car';
+import { fetchCarById, fetchCarRentals, type Rental } from '../api/client';
+import ErrorAlert from '../ui/ErrorAlert';
+import { formatServerError, type ErrorBoxData } from '../../utils/errors';
 
 type Props = {
   carId: number | string;

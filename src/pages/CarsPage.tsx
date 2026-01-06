@@ -1,3 +1,4 @@
+// src/pages/CarsPage.tsx
 
 import { useEffect, useState, useMemo } from 'react';
 import { useQueryParams } from '../hooks/useQueryParams';
