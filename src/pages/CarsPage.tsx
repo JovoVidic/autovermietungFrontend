@@ -12,19 +12,22 @@ export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
 
 
   
   const sortedCars = useMemo(() => {
-    const list = [...cars];
-    list.sort((a, b) => {
-      const pa = Number(a.preisProTag ?? 0);
-      const pb = Number(b.preisProTag ?? 0);
-      return sortDir === 'asc' ? pa - pb : pb - pa;
-    });
-    return list;
-  }, [cars, sortDir]);
+  if (!sortDir) return cars; // 👈 keine Sortierung
+
+  const list = [...cars];
+  list.sort((a, b) => {
+    const pa = Number(a.preisProTag ?? 0);
+    const pb = Number(b.preisProTag ?? 0);
+    return sortDir === 'asc' ? pa - pb : pb - pa;
+  });
+  return list;
+}, [cars, sortDir]);
+
 
 
   const filters = useMemo(() => {
@@ -98,33 +101,38 @@ export default function CarsPage() {
         <main>
           <h2>Ergebnisse</h2>
 
-          {/* ✅ SORTIER-BUTTONS */}
-          <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
-            <button
-              onClick={() => setSortDir('asc')}
-              style={{
-                padding: '0.5rem 1rem',
-                fontWeight: sortDir === 'asc' ? 'bold' : 'normal',
-              }}
-            >
-              Preis ↑
-            </button>
+          {/* SORTIER-BUTTONS */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <button
+                onClick={() => setSortDir('asc')}
+                style={{
+                  fontWeight: sortDir === 'asc' ? 'bold' : 'normal'
+                }}
+              >
+                Preis ↑
+              </button>
 
-            <button
-              onClick={() => setSortDir('desc')}
-              style={{
-                padding: '0.5rem 1rem',
-                fontWeight: sortDir === 'desc' ? 'bold' : 'normal',
-              }}
-            >
-              Preis ↓
-            </button>
-          </div>
+              <button
+                onClick={() => setSortDir('desc')}
+                style={{
+                  fontWeight: sortDir === 'desc' ? 'bold' : 'normal'
+                }}
+              >
+                Preis ↓
+              </button>
+
+              {sortDir && (
+                <button onClick={() => setSortDir(null)}>
+                  ✖ Sortierung aufheben
+                </button>
+              )}
+            </div>
+
 
           {loading && <div>⏳ Lade…</div>}
           {error && <div style={{ color: 'crimson' }}>{error}</div>}
 
-          {/* Noch OHNE Sortierung */}
+          {/* mit Sortierung */}
           {!loading && !error && <CarGrid cars={sortedCars} />}
         </main>
       </div>
